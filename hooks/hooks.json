@@ -1,0 +1,72 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/session-start.sh",
+            "timeout": 30,
+            "statusMessage": "ai-coding-config: session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/guard-dangerous-commands.sh",
+            "timeout": 10,
+            "statusMessage": "ai-coding-config: guard-dangerous-commands.sh"
+          },
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/validate-commit-msg.sh",
+            "timeout": 10,
+            "statusMessage": "ai-coding-config: validate-commit-msg.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/guard-secrets.sh",
+            "timeout": 10,
+            "statusMessage": "ai-coding-config: guard-secrets.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/mark-dirty.sh",
+            "timeout": 10,
+            "statusMessage": "ai-coding-config: mark-dirty.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__ACC_ROOT__/hooks/verify-gate.sh",
+            "timeout": 600,
+            "statusMessage": "ai-coding-config: verify-gate.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_comment": [
+    "Per-project override for the verification gate, read by hooks/lib/detect-toolchain.sh.",
+    "It is the first thing checked and it beats every other detection step, so any repo whose",
+    "setup the detector guesses wrong can state the truth here.",
+    "",
+    "This copy is how this config verifies itself: a contributor who ran install.sh --user has",
+    "the Stop hook globally, so working in this repo runs the suite at turn end. Without this",
+    "file the detector finds no manifest here and the gate would pass silently.",
+    "",
+    "Other keys a project can set: lint, typecheck, format (a value of \"\" means the project has",
+    "no such command, so stop looking), gate, skip."
+  ],
+  "test": "bash tests/run-tests.sh",
+  "timeoutSeconds": 180
+}

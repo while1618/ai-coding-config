@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Runs the ai-coding-config verification gate on the whole tree before a push.
+# Above AI_CODING_CONFIG_PUSH_CAP tracked files (default 500) the commands run without
+# file arguments, so a large tree does not hit the argument length limit.
+# Installed by install/install.sh, which also sets git config ai-coding-config.gate.
+# AI_CODING_CONFIG_SKIP_VERIFY=1 skips it.
+
+gate=$(git config --get ai-coding-config.gate)
+[ -n "$gate" ] && [ -x "$gate" ] || exit 0
+
+cap=${AI_CODING_CONFIG_PUSH_CAP:-500}
+files=$(git ls-files)
+count=$(printf '%s\n' "$files" | grep -c .)
+if [ "$count" -gt "$cap" ]; then
+  exec "$gate" --files
+fi
+
+old_ifs=$IFS
+IFS=$'\n'
+set -- $files
+IFS=$old_ifs
+exec "$gate" --files "$@"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Runs the ai-coding-config verification gate on the staged files.
+# Installed by install/install.sh, which also sets git config ai-coding-config.gate.
+# AI_CODING_CONFIG_SKIP_VERIFY=1 skips it.
+
+gate=$(git config --get ai-coding-config.gate)
+[ -n "$gate" ] && [ -x "$gate" ] || exit 0
+
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -n "$files" ] || exit 0
+
+old_ifs=$IFS
+IFS=$'\n'
+set -- $files
+IFS=$old_ifs
+exec "$gate" --files "$@"
