@@ -12,8 +12,9 @@ a plan with no spec has nothing to check its work against.
 
 ## 1. Collect the input
 
-The input is the approved brief from `shape-idea`, or the person's own description. Where the
-purpose, the users, or the success measure is unknown, run `shape-idea` first.
+The input is the approved brief from `shape-idea`, saved at `docs/brief.md`, or the person's own
+description. Where the purpose, the users, or the success measure is unknown, run `shape-idea`
+first.
 
 Where the project already has a spec location or format, follow it. Otherwise write to
 `docs/specs/YYYY-MM-DD-<name>.md`.

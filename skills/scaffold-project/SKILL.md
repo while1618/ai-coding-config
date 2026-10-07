@@ -71,7 +71,9 @@ existing template before you write one.
 
 - `.env.example` with every variable name and a placeholder value. No real value goes in the repo.
 - A short README with the commands to install, run, and test.
-- An `AGENTS.md`, written with the `agents-md` skill.
+- An `AGENTS.md`, written with the `agents-md` skill. Keep its **Specs and plans** section, with
+  the spec's real file name. That section is how the next session finds the spec, the decisions,
+  and the ledgers.
 
 ## When it is complete
 

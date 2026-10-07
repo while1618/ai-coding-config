@@ -12,9 +12,9 @@ conversation is the cheapest place to find that out.
 ## The gate
 
 Until the person approves the brief in step 6, take read-only actions only. Read code, read docs,
-and ask questions. Write no product code, generate no scaffold, install no dependency, and create
-no project. Approval of the brief permits the next stage only: a spec for a product, a build for a
-bounded change.
+and ask questions. The brief file in step 5 is the one file you write. Write no product code,
+generate no scaffold, install no dependency, and create no project. Approval of the brief permits
+the next stage only: a spec for a product, a build for a bounded change.
 
 ## 1. Classify the size, out loud
 
@@ -66,6 +66,10 @@ Library choices belong to the plan.
 
 ## 5. Write back the brief
 
+For a product, save the brief to `docs/brief.md` and show it in chat. A brief that lives only in
+the conversation is lost when the session ends before the spec is written. For a spike or a
+bounded change, the chat is enough.
+
 ```markdown
 **Idea:** <one sentence>
 **For:** <who uses it>
@@ -86,7 +90,7 @@ Keep "You said" and "I assumed" apart. The person can only correct an assumption
 Ask the person to confirm or correct the brief. The step is complete when the person says the
 brief is right. Then:
 
-- **Product:** use `write-spec`, with the brief as its input.
+- **Product:** use `write-spec`, with `docs/brief.md` as its input.
 - **Bounded:** build it with `write-tests`.
 - **Spike:** report the finding as a recommendation.
 
@@ -98,4 +102,5 @@ brief is right. Then:
 | "I know this kind of app, so it is bounded" | Bounded describes this repo, not your familiarity. A new app is a product |
 | Choosing the framework during the discussion | Settle the outcome and the journeys. The stack follows from the constraints |
 | Treating "sounds good" about the idea as approval of the brief | Show the brief. Approval covers only what the person has seen |
+| A product brief that exists only in chat | Save it to `docs/brief.md` before you ask for approval |
 | Scaffolding "to save time" while the person reads | The gate is the approval, not the length of the design |

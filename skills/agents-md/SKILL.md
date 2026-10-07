@@ -101,6 +101,18 @@ package.json alone.>
 - <e.g. Every migration needs a matching down migration, even trivially.>
 - <e.g. Tests use the real database via testcontainers. Do not add a repository mock.>
 
+## Specs and plans
+
+<Keep this section whenever `docs/specs/` exists. It is how a new session finds the work.
+Fill in the real file names.>
+
+- Product spec: `docs/specs/<file>` — the source of truth for every feature. Read it before
+  planning or reviewing.
+- Decisions: `docs/adr/` — read before proposing a technology or a structural change.
+- Plans: `docs/plans/` — one per journey. Before continuing work, read the newest
+  `*.ledger.md` there and resume from it.
+- Next feature: the first journey in the spec's ranking with no plan under `docs/plans/`.
+
 ## Gotchas
 
 <The things that waste an afternoon.>
