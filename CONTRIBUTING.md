@@ -95,7 +95,8 @@ paths:
 ```
 
 - **`paths` is the single source of truth for when the rule loads.** Claude Code reads it
-  directly from `.claude/rules/`, and it accepts brace groups such as `{ts,tsx}`.
+  directly from `.claude/rules/` and `~/.claude/rules/`, and it accepts brace groups such as
+  `{ts,tsx}`.
 - **A rule with no `paths` loads on every turn.** Only `00-core-engineering.md` has none, and a
   test fails if another rule leaves `paths` out. A second always-loaded rule needs a reason, and
   the test needs updating to name it.
@@ -119,6 +120,9 @@ A hook is code that runs on every matching event, so the bar is higher than for 
   attempts on an unchanged tree for exactly this reason.
 - Register it in `hooks/hooks.json` with the right event, matcher, and timeout. Use
   `__ACC_ROOT__` for the path — `install.sh` substitutes it.
+- Give it a `statusMessage` that starts with `ai-coding-config:`, followed by the script name. The
+  settings merge uses that tag to find its own hook groups, so it can replace them on a rerun and
+  remove them on uninstall. An untagged hook is copied again on every install, and a test fails.
 - Add cases to `tests/run-tests.sh` for both the acting and the passing path.
 
 ## Verify before you open a PR
@@ -146,8 +150,15 @@ detector finds no manifest in a repo of shell and markdown, and the gate would p
 If you have not installed at user scope, nothing runs the suite for you — use the command block
 above before opening a PR.
 
-After changing a rule or an agent, regenerate the projections in any project that has them, and
-confirm `doctor.sh` reports no drift.
+After a change, rerun the installer where the change does not reach on its own, then confirm
+`doctor.sh` reports no drift:
+
+| You changed | Rerun |
+|---|---|
+| An agent or a skill | Nothing. Both are links in every install. |
+| A rule | `install.sh --project` in each project. Project rules are copies. User rules are links. |
+| `AGENTS.md` | `install.sh --project` in each project. The project file holds a copied block. The global file is a link. |
+| `style/communication.md` | `install.sh` in every install, user scope included. The output style is a generated file. |
 
 ## What is deliberately absent
 
