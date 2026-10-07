@@ -1,5 +1,5 @@
 ---
-name: find-bug
+name: fix-bug
 description: Find and fix the root cause of a bug, test failure, crash, wrong output, or performance regression. Use when anything is broken, failing, throwing, hanging, flaky, or slow — before proposing any fix.
 ---
 

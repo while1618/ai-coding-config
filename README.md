@@ -146,17 +146,17 @@ The assistant starts most skills when the task matches. A person must start `/co
 
 - `scaffold-project` — set up a new repository with a formatter, linter, tests, and CI.
 - `write-tests` — write tests first, and make sure each test can fail.
-- `find-bug` — find and fix the root cause of a bug, crash, or failing test.
-- `refactor-safely` — change the structure of code without changing its behaviour.
-- `dependency-upgrade` — upgrade dependencies and check the result.
-- `resolve-merge-conflicts` — resolve merge or rebase conflicts by understanding both sides.
+- `fix-bug` — find and fix the root cause of a bug, crash, or failing test.
+- `refactor` — change the structure of code without changing its behaviour.
+- `upgrade-dependencies` — upgrade dependencies and check the result.
+- `resolve-conflicts` — resolve merge or rebase conflicts by understanding both sides.
 - `verify-changes` — prove that work is done before claiming it is done.
 
 **Review and git**
 
 - `pr-review` — review a change against the repo's standards and against its spec.
-- `pr-comments` — respond to review feedback item by item.
-- `security-review` — check a change for secrets, injection, and authorization problems.
+- `pr-respond` — respond to review feedback item by item.
+- `audit-security` — check a change for secrets, injection, and authorization problems.
 - `commit` — stage changes and write the commit message. Person-started only.
 - `pr-create` — open a pull request. Person-started only.
 

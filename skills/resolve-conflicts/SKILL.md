@@ -1,5 +1,5 @@
 ---
-name: resolve-merge-conflicts
+name: resolve-conflicts
 description: Resolve merge or rebase conflicts by understanding both sides. Use when a merge, rebase, or cherry-pick stopped on conflicts, or when the user asks to resolve conflicts.
 ---
 

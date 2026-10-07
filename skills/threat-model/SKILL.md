@@ -8,7 +8,7 @@ description: Find what can go wrong with a design's security before it is built,
 A threat model decides what the design must defend and how. It runs before the code exists,
 because a missing authorization layer is a redesign, while a missing input check is a one-line
 fix. Code-level rules live in `rules/60-security.md`. An audit of code that already exists is the
-`security-review` skill.
+`audit-security` skill.
 
 The method is STRIDE, applied at trust boundaries.
 

@@ -1,5 +1,5 @@
 ---
-name: refactor-safely
+name: refactor
 description: Restructure code without changing what it does. Use when the user asks to refactor, clean up, extract, split, rename, or simplify existing code, or to reduce duplication.
 ---
 

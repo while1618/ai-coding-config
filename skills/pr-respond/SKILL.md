@@ -1,5 +1,5 @@
 ---
-name: pr-comments
+name: pr-respond
 description: Respond to code review feedback — verify each item, push back where it is wrong, implement what is right, and reply in the thread. Use when the user shares review comments, says "address the feedback", or asks you to respond to a reviewer.
 ---
 

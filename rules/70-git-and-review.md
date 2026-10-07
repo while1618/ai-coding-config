@@ -111,4 +111,4 @@ Full process: the `pr-review` skill.
   beats "good catch".
 - **Say when you cannot verify.** "I cannot check this without staging access — investigate, or proceed?"
 
-Full process: the `pr-comments` skill.
+Full process: the `pr-respond` skill.

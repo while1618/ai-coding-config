@@ -1,5 +1,5 @@
 ---
-name: security-review
+name: audit-security
 description: Audit a change or a component for security risk — secrets, input handling, authorization, injection, dependencies, and what reaches the logs. Use when the user asks for a security review, before shipping anything handling untrusted input or credentials, or when reviewing auth code.
 ---
 

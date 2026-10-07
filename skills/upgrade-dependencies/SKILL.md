@@ -1,5 +1,5 @@
 ---
-name: dependency-upgrade
+name: upgrade-dependencies
 description: Upgrade dependencies without shipping a surprise. Use when the user asks to update dependencies, bump a package, apply a security advisory, or clear an audit warning.
 when_to_use: >-
   "update the dependencies", "bump this package", "fix the audit warnings", "apply the

@@ -89,7 +89,7 @@ database rows written by an earlier version of the code.
 - **Pin and lock.** Commit the lockfile. Install with the frozen-lockfile flag in CI.
 - **Check the package name character by character** before installing. Typosquatting works.
 - **Never add a dependency that runs an install script** without reading it.
-- **Upgrade deliberately** — the `dependency-upgrade` skill.
+- **Upgrade deliberately** — the `upgrade-dependencies` skill.
 
 ## What leaves the process
 
@@ -105,4 +105,4 @@ When you find something, report: the file and line, the class of issue, what an 
 fix. Rank by what an attacker gains, not by how easy the fix is. Where you are unsure whether a path is
 reachable, say that rather than either dropping it or overstating it.
 
-The `security-review` skill runs this as a full pass.
+The `audit-security` skill runs this as a full pass.

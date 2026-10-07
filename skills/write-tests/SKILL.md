@@ -190,7 +190,7 @@ Human prose earns no test at all.
 ## Bug fixes
 
 Every bug fix starts with a test that reproduces the bug. Then follow the loop. The test
-proves the fix and prevents the regression. The `find-bug` skill covers finding the cause
+proves the fix and prevents the regression. The `fix-bug` skill covers finding the cause
 first.
 
 ## When you are stuck
