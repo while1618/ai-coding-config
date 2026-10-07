@@ -159,6 +159,8 @@ A hook is code, and it runs on every matching event, so the bar is higher than f
 - **Test it by running it**, with fixture JSON on stdin, asserting on stdout. Never by grepping
   its source.
 - Add it to `hooks/hooks.json` with the right event and matcher, and give it a timeout.
+- Give it a `statusMessage` that starts with `ai-coding-config:`. The installer finds, replaces,
+  and removes its own hooks by that tag, and a test fails without it.
 
 ## Before you finish
 
