@@ -38,8 +38,11 @@ manifest="$target/acc-manifest.json"
 . "$root/hooks/lib/json.sh"
 m=$(cat "$manifest")
 mode=$(json_get "$m" mode)
-installed_root=$(json_get "$m" root)
-[ "$installed_root" = "$root" ] || problem "manifest points at $installed_root, but this config is at $root"
+# Only a user install links into the config, so only there does its location matter.
+if [ "$scope" = user ]; then
+  installed_root=$(json_get "$m" root)
+  [ "$installed_root" = "$root" ] || problem "manifest points at $installed_root, but this config is at $root"
+fi
 fine "manifest: mode=$mode"
 [ "$(json_backend)" != none ] && fine "JSON backend: $(json_backend)" || problem "no jq, python3, or node: hooks cannot read their input"
 
@@ -48,6 +51,7 @@ while :; do
   kind=$(json_get "$m" files "$i" kind); path=$(json_get "$m" files "$i" path)
   [ -n "$kind" ] || break
   i=$((i + 1))
+  path="$(dirname "$target")/$path"  # manifest paths are relative to the directory that holds .claude
   case "$kind" in
     symlink)
       if [ ! -L "$path" ]; then problem "missing link $path"
@@ -94,7 +98,9 @@ drift() {
 }
 drifted=''
 drifted="$drifted$(drift output-style --root "$root" --out "$target/output-styles/plain-technical-english.md")"
-drifted="$drifted$(drift settings-merge --settings "$target/settings.json" --hooks "$root/hooks/hooks.json" --root "$root")"
+hooks_root=$root
+[ "$scope" = project ] && hooks_root='"$CLAUDE_PROJECT_DIR"/.claude'
+drifted="$drifted$(drift settings-merge --settings "$target/settings.json" --hooks "$root/hooks/hooks.json" --root "$hooks_root")"
 if [ "$scope" = project ]; then
   instructions_dir=$project
   drifted="$drifted$(drift managed-block --root "$root" --out "$instructions_dir/AGENTS.md")"

@@ -510,15 +510,16 @@ out=$("$install" --project "$p" < /dev/null 2>&1); rc=$?
 expect_eq "install exits 0" 0 "$rc"
 m=$(cat "$p/.claude/acc-manifest.json")
 expect_eq "manifest records the scope" project "$(json_field "$m" scope)"
-expect_file "skills are linked" "$p/.claude/skills/commit"
-expect_eq "skill link points at the config" "$root/skills/commit" "$(readlink "$p/.claude/skills/commit")"
+expect_empty "project manifest records no root" "$(json_field "$m" root)"
+if [ -d "$p/.claude/skills/commit" ] && [ ! -L "$p/.claude/skills/commit" ]; then ok "project skills are copies, not links"; else bad "project skills are copies" "expected a real directory"; fi
+if [ -x "$p/.claude/hooks/verify-gate.sh" ] && [ ! -L "$p/.claude/hooks" ]; then ok "project hooks are copied"; else bad "project hooks are copied" "expected an executable copy"; fi
 expect_file "rules are installed" "$p/.claude/rules/00-core-engineering.md"
 if [ -f "$p/.claude/rules/10-naming-and-style.md" ] && [ ! -L "$p/.claude/rules/10-naming-and-style.md" ]; then ok "project rules are copies, not links"; else bad "project rules are copies" "expected a regular file"; fi
 expect_eq "a project rule copy matches its source" "" "$(diff "$root/rules/10-naming-and-style.md" "$p/.claude/rules/10-naming-and-style.md")"
-expect_file "agents are linked" "$p/.claude/agents/code-reviewer.md"
+expect_file "agents are installed" "$p/.claude/agents/code-reviewer.md"
 expect_file "output style is written" "$p/.claude/output-styles/plain-technical-english.md"
 expect_file "settings.json is written" "$p/.claude/settings.json"
-expect_eq "settings hooks point at the config" "$root/hooks/verify-gate.sh" "$(json_field "$(cat "$p/.claude/settings.json")" hooks Stop 0 hooks 0 command)"
+expect_eq "settings hooks point at the project copy" '"$CLAUDE_PROJECT_DIR"/.claude/hooks/verify-gate.sh' "$(json_field "$(cat "$p/.claude/settings.json")" hooks Stop 0 hooks 0 command)"
 expect_contains "CLAUDE.md carries the managed block" "$(cat "$p/CLAUDE.md")" "ai-coding-config:begin"
 expect_eq "CLAUDE.md block imports AGENTS.md" "@AGENTS.md" "$(sed -n '/ai-coding-config:begin/,/ai-coding-config:end/p' "$p/CLAUDE.md" | grep '^@')"
 expect_contains "AGENTS.md carries the config instructions" "$(cat "$p/AGENTS.md")" "Non-negotiables"
@@ -526,9 +527,9 @@ expect_contains "AGENTS.md block is managed" "$(cat "$p/AGENTS.md")" "ai-coding-
 expect_no_file "install writes nothing under .github" "$p/.github"
 expect_file "pre-commit hook" "$p/.git/hooks/pre-commit"
 expect_file "pre-push hook" "$p/.git/hooks/pre-push"
-expect_eq "git config gate" "$root/hooks/verify-gate.sh" "$(cd "$p" && git config --get ai-coding-config.gate)"
-expect_eq "manifest counts symlinks" 33 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["kind"]=="symlink"))')"
-expect_eq "manifest counts rule copies" 8 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["kind"]=="copy"))')"
+expect_eq "git config gate" "$p/.claude/hooks/verify-gate.sh" "$(cd "$p" && git config --get ai-coding-config.gate)"
+expect_eq "manifest counts no symlinks" 0 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["kind"]=="symlink"))')"
+expect_eq "manifest counts copies" 42 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["kind"]=="copy"))')"
 out=$("$install" --project "$p" < /dev/null 2>&1)
 expect_not_contains "second install skips nothing" "$out" "skipped"
 expect_contains "second install reports already-linked files" "$out" "already"
@@ -541,7 +542,7 @@ expect_eq "refreshed copy matches its source" "" "$(diff "$root/rules/40-testing
 
 p="$work/install-dry"; mkdir -p "$p"; (cd "$p" && git init -q .)
 out=$("$install" --project "$p" --dry-run 2>&1)
-expect_contains "--dry-run reports" "$out" "would symlink"
+expect_contains "--dry-run reports" "$out" "would copy"
 expect_no_file "--dry-run writes no .claude" "$p/.claude"
 expect_no_file "--dry-run writes no CLAUDE.md" "$p/CLAUDE.md"
 expect_empty "--dry-run sets no git config" "$(cd "$p" && git config --get ai-coding-config.gate)"
@@ -599,7 +600,8 @@ expect_eq "doctor without an install exits 1" 1 "$("$doctor" --project "$p" >/de
 "$install" --project "$p" >/dev/null 2>&1
 "$install" --project "$p" >/dev/null 2>&1
 m=$(cat "$p/.claude/acc-manifest.json")
-expect_eq "manifest keeps first-run entries after a rerun" 1 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["path"].endswith("/CLAUDE.md")))')"
+expect_eq "manifest keeps first-run entries after a rerun" 1 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["path"] == "CLAUDE.md"))')"
+expect_eq "manifest paths are relative to the project" 0 "$(printf '%s' "$m" | python3 -c 'import json,sys; print(sum(1 for f in json.load(sys.stdin)["files"] if f["path"].startswith("/")))')"
 out=$("$doctor" --project "$p" 2>&1); rc=$?
 expect_eq "doctor on a healthy install exits 0" 0 "$rc"
 expect_contains "doctor reports no problems" "$out" "No problems."
@@ -610,8 +612,8 @@ expect_eq "doctor exits 1 on drift" 1 "$rc"
 expect_contains "doctor names the drifted file" "$out" "drift    $p/.claude/output-styles/plain-technical-english.md"
 "$install" --project "$p" >/dev/null 2>&1
 expect_eq "install regenerates the drifted file" 0 "$("$doctor" --project "$p" >/dev/null 2>&1; echo $?)"
-rm "$p/.claude/skills/commit"
-expect_contains "doctor reports a missing link" "$("$doctor" --project "$p" 2>&1)" "missing link $p/.claude/skills/commit"
+rm -r "$p/.claude/skills/commit"
+expect_contains "doctor reports a missing copy" "$("$doctor" --project "$p" 2>&1)" "missing copy $p/.claude/skills/commit"
 "$install" --project "$p" >/dev/null 2>&1
 (cd "$p" && git config --unset ai-coding-config.gate)
 expect_contains "doctor reports an unset gate config" "$("$doctor" --project "$p" 2>&1)" "ai-coding-config.gate is unset"

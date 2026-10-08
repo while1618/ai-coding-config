@@ -27,10 +27,12 @@ and hooks that enforce the parts that must not depend on the model's memory.
 
 ## Install
 
-Clone the repo and keep it in place. By default the installer links files back to the clone, so a
-`git pull` updates every install. Two kinds of file are not links: generated files, and the rules in
-a project install. After a `git pull`, run the installer again to refresh them. `doctor.sh` reports
-any that are out of date.
+Clone the repo and keep it in place. A user install links files back to the clone, so a `git pull`
+updates it. A project install copies everything, so you can edit the copies and commit them, and
+teammates without this config get the same setup. Generated files are never links. After a
+`git pull`, run the installer again to refresh the copies and generated files. `doctor.sh` reports
+any that are out of date. A rerun overwrites every copy it installed, including copies you edited,
+so commit your edits first and review the diff after.
 
 **For your user account:**
 
@@ -49,9 +51,9 @@ session on the machine uses all of it.
 install/install.sh --project /path/to/repo
 ```
 
-This puts the same skills, rules, agents, hooks, and output style into `<repo>/.claude/`. The rules
-are copied, because Claude Code does not load a project rule that links outside the project. The
-config's instructions are copied into `<repo>/AGENTS.md`, appended when the file already exists.
+This copies the same skills, rules, agents, hooks, and output style into `<repo>/.claude/`. The
+hooks in `settings.json` run from `$CLAUDE_PROJECT_DIR/.claude/hooks/`, so nothing points back at
+the clone. The config's instructions are copied into `<repo>/AGENTS.md`, appended when the file already exists.
 `<repo>/CLAUDE.md` gets an `@AGENTS.md` import the same way, because Claude Code reads only
 `CLAUDE.md` when both exist. When `CLAUDE.md` already imports `AGENTS.md`, it is left alone.
 It also installs the git hooks.
@@ -64,7 +66,7 @@ Options:
 
 | Flag | Effect |
 |---|---|
-| `--copy` | Copy files instead of linking them. |
+| `--copy` | Copy files instead of linking them (user scope; a project install always copies). |
 | `--dry-run` | Print what would change and change nothing. |
 | `--no-git-hooks` | Skip the `pre-commit` and `pre-push` hooks (project scope only). |
 

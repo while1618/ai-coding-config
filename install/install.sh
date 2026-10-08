@@ -2,10 +2,11 @@
 # Installs ai-coding-config into the user scope or a project.
 #
 #   install/install.sh --user [--copy] [--dry-run]
-#   install/install.sh --project <path> [--copy] [--dry-run] [--no-git-hooks]
+#   install/install.sh --project <path> [--dry-run] [--no-git-hooks]
 #
-# Skills, rules, and agents are symlinked (or copied with --copy). Project rules are always
-# copied, because Claude Code does not load a project rule that links outside the project. No existing file is ever
+# A user install symlinks skills, rules, and agents (or copies them with --copy). A project
+# install always copies them, and the hooks too, so the project works without this config
+# and its copies can be edited. No existing file is ever
 # overwritten: a file that is already there is reported and left alone. settings.json is
 # backed up to settings.json.acc-backup before the hook groups are merged in. A manifest
 # of everything installed is written next to the settings file.
@@ -46,6 +47,8 @@ case "$scope" in
     ;;
   *) echo "install.sh: choose --user or --project <path>" >&2; usage >&2; exit 2 ;;
 esac
+# A project install is self-contained, so teammates without this config can use it.
+[ "$scope" = project ] && mode=copy
 command -v python3 >/dev/null 2>&1 || { echo "install.sh: python3 is required" >&2; exit 2; }
 
 manifest_entries=''
@@ -57,9 +60,9 @@ dry() { [ "$dry_run" = 1 ]; }
 # Copies an earlier install recorded are ours, so a rerun may refresh them.
 owned=''
 if [ -f "$target/acc-manifest.json" ]; then
-  owned=$(python3 -c 'import json, sys
+  owned=$(python3 -c 'import json, os, sys
 for f in json.load(open(sys.argv[1])).get("files", []):
-    if f.get("kind") == "copy": print(f["path"])' "$target/acc-manifest.json" 2>/dev/null)
+    if f.get("kind") == "copy": print(os.path.join(sys.argv[2], f["path"]))' "$target/acc-manifest.json" "$(dirname "$target")" 2>/dev/null)
 fi
 is_owned() { printf '%s\n' "$owned" | grep -qxF -- "$1"; }
 
@@ -110,16 +113,22 @@ for skill in "$root"/skills/*/; do
   name=$(basename "$skill")
   place "${skill%/}" "$target/skills/$name"
 done
-# Claude Code does not load a project rule that symlinks outside the project, so project
-# rules are always copies. User-scope rules may stay links.
-rule_mode=$mode
-[ "$scope" = project ] && rule_mode=copy
 for rule in "$root"/rules/*.md; do
-  place "$rule" "$target/rules/$(basename "$rule")" "$rule_mode"
+  place "$rule" "$target/rules/$(basename "$rule")"
 done
 for agent in "$root"/agents/*.md; do
   place "$agent" "$target/agents/$(basename "$agent")"
 done
+
+# A project runs its own copy of the hooks; a user install runs them from this config.
+if [ "$scope" = project ]; then
+  place "$root/hooks" "$target/hooks"
+  hooks_root='"$CLAUDE_PROJECT_DIR"/.claude'
+  gate="$target/hooks/verify-gate.sh"
+else
+  hooks_root=$root
+  gate="$root/hooks/verify-gate.sh"
+fi
 
 render_to generated output-style --root "$root" --out "$target/output-styles/plain-technical-english.md"
 
@@ -130,7 +139,7 @@ if [ -f "$settings" ] && [ ! -f "$settings.acc-backup" ] && ! grep -q 'ai-coding
   else cp "$settings" "$settings.acc-backup"; say "backup    $settings.acc-backup"; fi
   record backup "$settings.acc-backup"
 fi
-render_to settings settings-merge --settings "$settings" --hooks "$root/hooks/hooks.json" --root "$root" --output-style "Plain Technical English"
+render_to settings settings-merge --settings "$settings" --hooks "$root/hooks/hooks.json" --root "$hooks_root" --output-style "Plain Technical English"
 
 # AGENTS.md carries the instructions. CLAUDE.md imports it, because Claude Code reads only
 # CLAUDE.md when both exist, and reads nothing from ~/.claude/AGENTS.md on its own.
@@ -159,7 +168,7 @@ if [ "$scope" = project ] && [ "$git_hooks" = 1 ]; then
       place "$root/git-hooks/$hook" "$git_dir/hooks/$hook"
     done
     if dry; then say "would set git config ai-coding-config.gate"
-    else (cd "$project" && git config ai-coding-config.gate "$root/hooks/verify-gate.sh"); say "git config ai-coding-config.gate set"; fi
+    else (cd "$project" && git config ai-coding-config.gate "$gate"); say "git config ai-coding-config.gate set"; fi
     record git-config ai-coding-config.gate
   fi
 fi

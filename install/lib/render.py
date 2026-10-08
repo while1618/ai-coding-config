@@ -9,14 +9,14 @@ Subcommands (all print one line per file: wrote, updated, unchanged, skipped, or
   managed-block   --root ROOT --out PATH [--import FILE] [--remove]
                   (the block holds AGENTS.md's body, or just "@FILE" with --import)
   manifest        --out PATH --root ROOT --scope S --target T --mode MODE
-                  (entries on stdin, one "kind<TAB>path" per line)
+                  (entries on stdin, one "kind<TAB>path" per line; paths are stored
+                  relative to the directory that holds T)
 
 Every generated file starts with MARKER. A file that exists without it is never touched.
 --dry-run reports what would change and writes nothing.
 """
 
 import argparse
-import datetime
 import json
 import os
 import sys
@@ -127,7 +127,12 @@ def cmd_settings_merge(args):
         text = read(args.settings)
         if text.strip():
             settings = json.loads(text)
-    ours = json.loads(read(args.hooks).replace("__ACC_ROOT__", args.root))["hooks"]
+    ours = json.loads(read(args.hooks))["hooks"]
+    # Substituted after parsing, because a project root carries quotes.
+    for groups in ours.values():
+        for group in groups:
+            for h in group.get("hooks", []):
+                h["command"] = h["command"].replace("__ACC_ROOT__", args.root)
     hooks = settings.setdefault("hooks", {})
 
     def is_ours(group):
@@ -282,22 +287,24 @@ def cmd_manifest(args):
             files = [f for f in previous.get("files", []) if isinstance(f, dict)]
         except ValueError:
             pass
+    base = os.path.dirname(args.target)
+
+    def rel(path):
+        return os.path.relpath(path, base) if os.path.isabs(path) else path
+
     seen = set((f["kind"], f["path"]) for f in files)
     for line in sys.stdin.read().split("\n"):
         if "\t" in line:
             kind, _, path = line.partition("\t")
+            path = rel(path)
             if (kind, path) not in seen:
                 files.append({"kind": kind, "path": path})
                 seen.add((kind, path))
-    data = {
-        "version": 1,
-        "root": args.root,
-        "scope": args.scope,
-        "target": args.target,
-        "mode": args.mode,
-        "installedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-        "files": files,
-    }
+    data = {"version": 1}
+    # A project manifest is committed, so it holds no machine-specific path.
+    if args.scope != "project":
+        data["root"] = args.root
+    data.update({"scope": args.scope, "mode": args.mode, "files": files})
     content = json.dumps(data, indent=2) + "\n"
     if args.dry_run:
         print("would write %s" % args.out)

@@ -155,8 +155,7 @@ After a change, rerun the installer where the change does not reach on its own, 
 
 | You changed | Rerun |
 |---|---|
-| An agent or a skill | Nothing. Both are links in every install. |
-| A rule | `install.sh --project` in each project. Project rules are copies. User rules are links. |
+| An agent, a skill, a rule, or a hook | `install.sh --project` in each project. Project installs are copies. User installs are links. |
 | `AGENTS.md` | `install.sh --project` in each project. The project file holds a copied block. The global file is a link. |
 | `style/communication.md` | `install.sh` in every install, user scope included. The output style is a generated file. |
 

@@ -48,6 +48,7 @@ while :; do
   kind=$(json_get "$m" files "$i" kind); path=$(json_get "$m" files "$i" path)
   [ -n "$kind" ] || break
   i=$((i + 1))
+  path="$(dirname "$target")/$path"  # manifest paths are relative to the directory that holds .claude
   case "$kind" in
     symlink)
       if [ -L "$path" ]; then
