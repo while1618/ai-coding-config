@@ -158,7 +158,7 @@ The assistant starts most skills when the task matches. A person must start `/co
 
 - `pr-review` — review a change against the repo's standards and against its spec.
 - `pr-respond` — respond to review feedback item by item.
-- `audit-security` — check a change for secrets, injection, and authorization problems.
+- `audit-security` — review a change against the OWASP Top 10, from access control to error handling.
 - `commit` — stage changes and write the commit message. Person-started only.
 - `pr-create` — open a pull request. Person-started only.
 
